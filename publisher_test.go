@@ -27,8 +27,7 @@ func TestShouldPublish(t *testing.T) {
 	mockGenerator.On("Generate", "my-name-space.servicebus.windows.net/my-queue", "my-signing-key", 1234, "my-shared-keyname").Return("some-sas-token", nil)
 	mockServiceBusAdapter.On("SendMessage", "my-name-space", "my-queue", "some-sas-token", message).Return(nil)
 
-	publisher := NewPublisher(logger.NewStandardLogger("test"), mockServiceBusAdapter, config)
-	publisher.generator = mockGenerator
+	publisher := Publisher{logger.NewStandardLogger("test"), mockServiceBusAdapter, mockGenerator, config}
 
 	err := publisher.Publish(message)
 	assert.NoError(t, err)
@@ -44,8 +43,7 @@ func TestShouldReturnErrorWhenSendMessageReturns(t *testing.T) {
 	mockGenerator.On("Generate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("some-sas-token", nil)
 	mockServiceBusAdapter.On("SendMessage", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(errors.New("An expected error"))
 
-	publisher := NewPublisher(logger.NewStandardLogger("test"), mockServiceBusAdapter, config)
-	publisher.generator = mockGenerator
+	publisher := Publisher{logger.NewStandardLogger("test"), mockServiceBusAdapter, mockGenerator, config}
 
 	err := publisher.Publish(message)
 	assert.Error(t, err)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Placons/oneapp-lib-servicebus-publisher/adapter"
 	"github.com/Placons/oneapp-lib-servicebus-publisher/sas"
 	"github.com/Placons/oneapp-logger/logger"
 )
@@ -15,10 +16,10 @@ type Publisher struct {
 	config            ServiceBusConfig
 }
 
-func NewPublisher(logger *logger.StandardLogger, serviceBusAdapter ServiceBusAdapter, config ServiceBusConfig) Publisher {
+func NewPublisher(logger *logger.StandardLogger, client adapter.HTTPClient, config ServiceBusConfig) Publisher {
 	return Publisher{
 		logger:            logger,
-		serviceBusAdapter: serviceBusAdapter,
+		serviceBusAdapter: adapter.NewServiceBusAdapter(logger, client),
 		generator:         sas.NewSasGenerator(realClock{}),
 		config:            config,
 	}

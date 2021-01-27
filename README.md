@@ -17,7 +17,6 @@ From your service initialize a publisher with all the dependant services
 ```go
 	l := logger.NewStandardLogger("oneapp-my-service")
 	serviceBusClient := &http.Client{Timeout: time.Duration(1000) * time.Millisecond}
-	serviceBusAdapter := adapter.NewServiceBusAdapter(l, serviceBusClient)
 
 	// these values will be derived from the services configuration
 	config := publisher.ServiceBusConfig{
@@ -27,7 +26,7 @@ From your service initialize a publisher with all the dependant services
 		SigningKey:          "my-signing-key",
 		SigningKeyExpiresMS: 1234,
 	}
-	p := publisher.NewPublisher(l, serviceBusAdapter, config)
+	p := publisher.NewPublisher(l, serviceBusClient, config)
 ```
 
  and publish a message
