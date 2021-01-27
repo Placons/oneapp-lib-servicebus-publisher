@@ -31,8 +31,8 @@ type HTTPClient interface {
 // serviceNamespace is the namespace of the azure service bus
 // endpoint is the name of the endpoint (topic or queue)
 // message is the actual message
-func (a ServiceBusAdapter) SendMessage(serviceNamespace string, endpoint string, sasToken string, message interface{}) error {
-	url := fmt.Sprintf("https://%s.servicebus.windows.net/%s/messages", serviceNamespace, endpoint)
+func (a ServiceBusAdapter) SendMessage(baseURL string, sasToken string, message interface{}) error {
+	url := fmt.Sprintf("%s/messages", baseURL)
 	requestByte, _ := json.Marshal(message)
 	r, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(requestByte))
 
@@ -57,7 +57,7 @@ func (a ServiceBusAdapter) SendMessage(serviceNamespace string, endpoint string,
 	}
 	a.logger.DebugWithFields("Successfully sent message", map[string]interface{}{
 		"message": string(requestByte),
-		"queue":   endpoint,
+		"url":     url,
 	})
 	return nil
 }
