@@ -18,6 +18,7 @@ var config = ServiceBusConfig{
 	SharedKeyName:       "my-shared-keyname",
 	SigningKey:          "my-signing-key",
 	SigningKeyExpiresMS: 1234,
+	EndpointBaseURL:     "http://endpoint-url",
 }
 
 func TestShouldPublish(t *testing.T) {
@@ -25,7 +26,7 @@ func TestShouldPublish(t *testing.T) {
 	mockGenerator := new(FakeSasGenerator)
 
 	mockGenerator.On("Generate", "my-name-space.servicebus.windows.net/my-queue", "my-signing-key", 1234, "my-shared-keyname").Return("some-sas-token", nil)
-	mockServiceBusAdapter.On("SendMessage", "my-name-space", "my-queue", "some-sas-token", message).Return(nil)
+	mockServiceBusAdapter.On("SendMessage", "http://endpoint-url", "some-sas-token", message).Return(nil)
 
 	publisher := Publisher{logger.NewStandardLogger("test"), mockServiceBusAdapter, mockGenerator, config}
 
@@ -41,7 +42,7 @@ func TestShouldReturnErrorWhenSendMessageReturns(t *testing.T) {
 	mockGenerator := new(FakeSasGenerator)
 
 	mockGenerator.On("Generate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("some-sas-token", nil)
-	mockServiceBusAdapter.On("SendMessage", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(errors.New("An expected error"))
+	mockServiceBusAdapter.On("SendMessage", mock.Anything, mock.Anything, mock.Anything).Return(errors.New("An expected error"))
 
 	publisher := Publisher{logger.NewStandardLogger("test"), mockServiceBusAdapter, mockGenerator, config}
 
@@ -56,8 +57,8 @@ type FakeServiceBusAdapter struct {
 	mock.Mock
 }
 
-func (m *FakeServiceBusAdapter) SendMessage(serviceNamespace string, queue string, sasToken string, message interface{}) error {
-	args := m.Called(serviceNamespace, queue, sasToken, message)
+func (m *FakeServiceBusAdapter) SendMessage(url string, sasToken string, message interface{}) error {
+	args := m.Called(url, sasToken, message)
 	return args.Error(0)
 }
 

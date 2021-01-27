@@ -30,7 +30,7 @@ func TestShouldSendMessageSuccessfully(t *testing.T) {
 
 	adapter := NewServiceBusAdapter(logger.NewStandardLogger("test"), mockClient)
 
-	err := adapter.SendMessage("my-namespace", "my-queue", "my-sas",
+	err := adapter.SendMessage("some-url", "my-sas",
 		DummyMessage{
 			Greeting: "Hello from my go client!",
 		})
@@ -44,7 +44,7 @@ func TestReturnErrorWhenResponseStatusCodeNotCreated(t *testing.T) {
 
 	adapter := NewServiceBusAdapter(logger.NewStandardLogger("test"), mockClient)
 
-	err := adapter.SendMessage("my-namespace", "my-queue", "my-sas",
+	err := adapter.SendMessage("some-url", "my-sas",
 		DummyMessage{
 			Greeting: "Hello from my go client!",
 		})
@@ -59,7 +59,7 @@ func TestServiceBusAdapterReturnErrorWhenHttpRequestCouldNotBeSent(t *testing.T)
 
 	adapter := NewServiceBusAdapter(logger.NewStandardLogger("test"), mockClient)
 
-	err := adapter.SendMessage("my-namespace", "my-queue", "my-sas", nil)
+	err := adapter.SendMessage("some-url", "my-sas", nil)
 
 	assert.Error(t, err)
 	assert.EqualError(t, err, "An expected error")

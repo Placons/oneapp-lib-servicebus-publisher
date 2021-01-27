@@ -25,6 +25,7 @@ From your service initialize a publisher with all the dependant services
 		SharedKeyName:       "my-shared-keyname",
 		SigningKey:          "my-signing-key",
 		SigningKeyExpiresMS: 1234,
+		EndpointURL:         "https://my-name-space.servicebus.windows.net/my-queue"
 	}
 	p := publisher.NewPublisher(l, serviceBusClient, config)
 ```

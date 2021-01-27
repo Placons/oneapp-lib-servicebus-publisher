@@ -27,6 +27,7 @@ func NewPublisher(logger *logger.StandardLogger, client adapter.HTTPClient, conf
 
 func (p Publisher) Publish(message interface{}) error {
 	var (
+		baseURL       = p.config.EndpointBaseURL
 		namespace     = p.config.Namespace
 		endpoint      = p.config.Endpoint
 		signingKey    = p.config.SigningKey
@@ -36,7 +37,7 @@ func (p Publisher) Publish(message interface{}) error {
 
 	sasToken := p.generator.Generate(fmt.Sprintf("%s.servicebus.windows.net/%s", namespace, endpoint), signingKey, expiry, sharedKeyName)
 
-	err := p.serviceBusAdapter.SendMessage(namespace, endpoint, sasToken, message)
+	err := p.serviceBusAdapter.SendMessage(baseURL, sasToken, message)
 	if err != nil {
 		p.logger.ErrorWithErrAndFields("Failed to publish message to endpoint", err, map[string]interface{}{
 			"endpoint": endpoint,
@@ -52,7 +53,7 @@ func (p Publisher) Publish(message interface{}) error {
 }
 
 type ServiceBusAdapter interface {
-	SendMessage(serviceNamespace string, queue string, sasToken string, message interface{}) error
+	SendMessage(url string, sasToken string, message interface{}) error
 }
 
 type SasTokenGenerator interface {
@@ -60,12 +61,12 @@ type SasTokenGenerator interface {
 }
 
 type ServiceBusConfig struct {
+	EndpointBaseURL     string
 	Namespace           string
 	Endpoint            string
 	SharedKeyName       string
 	SigningKey          string
 	SigningKeyExpiresMS int
-	ClientTimeoutMS     int
 }
 
 type realClock struct{}
