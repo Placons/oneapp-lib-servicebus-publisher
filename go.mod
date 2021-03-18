@@ -1,4 +1,4 @@
-module github.com/Placons/oneapp-lib-servicebus-publisher
+module github.com/Placons/oneapp-lib-servicebus-publisher/v2
 
 go 1.14
 
