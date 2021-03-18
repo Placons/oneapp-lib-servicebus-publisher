@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/Placons/oneapp-lib-servicebus-publisher/adapter"
-	"github.com/Placons/oneapp-lib-servicebus-publisher/sas"
+	"github.com/Placons/oneapp-lib-servicebus-publisher/v2/adapter"
+	"github.com/Placons/oneapp-lib-servicebus-publisher/v2/sas"
 	"github.com/Placons/oneapp-logger/logger"
 )
 
