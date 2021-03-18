@@ -13,20 +13,19 @@ var message = map[string]string{
 	"I am here": "to poke you",
 }
 var config = ServiceBusConfig{
-	Namespace:           "my-name-space",
-	Endpoint:            "my-queue",
+	Endpoint:            "sb://my-namespace.servicebus.windows.net/",
+	QueueName:           "my-queue",
 	SharedKeyName:       "my-shared-keyname",
 	SigningKey:          "my-signing-key",
 	SigningKeyExpiresMS: 1234,
-	EndpointBaseURL:     "http://endpoint-url",
 }
 
 func TestShouldPublish(t *testing.T) {
 	mockServiceBusAdapter := new(FakeServiceBusAdapter)
 	mockGenerator := new(FakeSasGenerator)
 
-	mockGenerator.On("Generate", "my-name-space.servicebus.windows.net/my-queue", "my-signing-key", 1234, "my-shared-keyname").Return("some-sas-token", nil)
-	mockServiceBusAdapter.On("SendMessage", "http://endpoint-url", "some-sas-token", message).Return(nil)
+	mockGenerator.On("Generate", "https://my-namespace.servicebus.windows.net/my-queue", "my-signing-key", 1234, "my-shared-keyname").Return("some-sas-token", nil)
+	mockServiceBusAdapter.On("SendMessage", "https://my-namespace.servicebus.windows.net/my-queue", "some-sas-token", message).Return(nil)
 
 	publisher := Publisher{logger.NewStandardLogger("test"), mockServiceBusAdapter, mockGenerator, config}
 

@@ -1,7 +1,8 @@
 package publisher
 
 import (
-	"fmt"
+	"errors"
+	"net/url"
 	"time"
 
 	"github.com/Placons/oneapp-lib-servicebus-publisher/adapter"
@@ -27,17 +28,42 @@ func NewPublisher(logger *logger.StandardLogger, client adapter.HTTPClient, conf
 
 func (p Publisher) Publish(message interface{}) error {
 	var (
-		baseURL       = p.config.EndpointBaseURL
-		namespace     = p.config.Namespace
 		endpoint      = p.config.Endpoint
+		queueName     = p.config.QueueName
+		topicName     = p.config.TopicName
 		signingKey    = p.config.SigningKey
 		expiry        = p.config.SigningKeyExpiresMS
 		sharedKeyName = p.config.SharedKeyName
 	)
 
-	sasToken := p.generator.Generate(fmt.Sprintf("%s.servicebus.windows.net/%s", namespace, endpoint), signingKey, expiry, sharedKeyName)
+	publishURL, err := url.Parse(endpoint)
+	if err != nil {
+		p.logger.ErrorWithErrAndFields("Failed to construct publish url", err, map[string]interface{}{
+			"endpoint": endpoint,
+			"message":  message,
+		})
+		return err
+	}
+	// change schema from sb to https as the publisher uses rest whereas the consumer uses the custom sb-protocol
+	publishURL.Scheme = "https"
 
-	err := p.serviceBusAdapter.SendMessage(baseURL, sasToken, message)
+	var pubURL string
+	if queueName != "" {
+		pubURL = joinURL(publishURL, queueName)
+	} else if topicName != "" {
+		pubURL = joinURL(publishURL, topicName)
+	}
+	if pubURL == "" {
+		err = errors.New("pub url is not set")
+		p.logger.ErrorWithErrAndFields("Could not construct pub url", err, map[string]interface{}{
+			"endpoint": endpoint,
+			"message":  message,
+		})
+		return err
+	}
+	sasToken := p.generator.Generate(pubURL, signingKey, expiry, sharedKeyName)
+
+	err = p.serviceBusAdapter.SendMessage(pubURL, sasToken, message)
 	if err != nil {
 		p.logger.ErrorWithErrAndFields("Failed to publish message to endpoint", err, map[string]interface{}{
 			"endpoint": endpoint,
@@ -52,6 +78,14 @@ func (p Publisher) Publish(message interface{}) error {
 	return nil
 }
 
+func joinURL(url *url.URL, path string) string {
+	up, err := url.Parse(path)
+	if err != nil {
+		return ""
+	}
+	return url.ResolveReference(up).String()
+}
+
 type ServiceBusAdapter interface {
 	SendMessage(url string, sasToken string, message interface{}) error
 }
@@ -61,9 +95,9 @@ type SasTokenGenerator interface {
 }
 
 type ServiceBusConfig struct {
-	EndpointBaseURL     string
-	Namespace           string
 	Endpoint            string
+	QueueName           string
+	TopicName           string
 	SharedKeyName       string
 	SigningKey          string
 	SigningKeyExpiresMS int
