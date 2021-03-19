@@ -1,5 +1,8 @@
 github.com/Placons/oneapp-logger v1.1.8 h1:b3BXv+gs/SJmDm/v3Yf3GWVWx/+vGXXQ0Di5WucM5ro=
 github.com/Placons/oneapp-logger v1.1.8/go.mod h1:xAabyXy5ZebEYbAC/nI7VmTg+igsulgxtj92RaydsAk=
+github.com/Placons/oneapp-logger v1.3.1 h1:oUqwxqF4lvGS2cAo5sNv6cxjfPJO2/J9wZe1rneoivM=
+github.com/Placons/oneapp-logger v1.3.1/go.mod h1:sMRHbcAtPzIMxPw4nWuImofKRr0RM0ULPnVkrlAQDNo=
+github.com/antonfisher/nested-logrus-formatter v1.3.0/go.mod h1:6WTfyWFkBc9+zyBaKIqRrg/KwMqBbodBjgbHjDz7zjA=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

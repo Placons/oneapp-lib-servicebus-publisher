@@ -2,6 +2,7 @@ package publisher
 
 import (
 	"errors"
+	"fmt"
 	"net/url"
 	"time"
 
@@ -17,6 +18,7 @@ type Publisher struct {
 	config            ServiceBusConfig
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func NewPublisher(logger *logger.StandardLogger, client adapter.HTTPClient, config ServiceBusConfig) Publisher {
 	return Publisher{
 		logger:            logger,
@@ -34,6 +36,13 @@ func (p Publisher) Publish(message interface{}) error {
 		signingKey    = p.config.SigningKey
 		expiry        = p.config.SigningKeyExpiresMS
 		sharedKeyName = p.config.SharedKeyName
+	)
+	l := p.logger.Audit("send-message")
+	l.Start("sending message",
+		logger.Generic("endpoint", endpoint),
+		logger.Generic("queue", queueName),
+		logger.Generic("topic", topicName),
+		logger.Generic("messageLength", len(fmt.Sprintf("%v", message))),
 	)
 
 	publishURL, err := url.Parse(endpoint)
@@ -71,10 +80,7 @@ func (p Publisher) Publish(message interface{}) error {
 		})
 		return err
 	}
-	p.logger.DebugWithFields("Successfully publish message to endpoint", map[string]interface{}{
-		"endpoint": endpoint,
-		"message":  message,
-	})
+	l.End("sent message")
 	return nil
 }
 
