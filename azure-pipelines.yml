@@ -6,7 +6,7 @@
 name: $(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 
 trigger:
-  batch: true # when a pipeline is running, the system waits until the run is completed, then starts another run with all changes that have not yet been built.
+  #batch: true # when a pipeline is running, the system waits until the run is completed, then starts another run with all changes that have not yet been built.
   branches:
     include:
     - refs/heads/develop
