@@ -9,8 +9,8 @@ trigger:
   #batch: true # when a pipeline is running, the system waits until the run is completed, then starts another run with all changes that have not yet been built.
   branches:
     include:
-    - refs/heads/develop
     - refs/heads/master
+    - refs/heads/release/*
   paths:
     include:
     - '*' # same as '/' for the repository root
@@ -21,7 +21,6 @@ trigger:
 ## Pull-requests with target will trigger the pipeline
 pr:
   - master
-  - develop
 
 variables:  
 - name: version.MajorMinor
@@ -53,7 +52,7 @@ stages:
       ##################################################################
       ## git check out
       - checkout: self
-        # persit creds for later use by git command to set the git tag
+        # persist credentials for later use by git command to set the git tag
         persistCredentials: true
       - task: Go@0
         inputs:
@@ -73,8 +72,7 @@ stages:
           git config --list
           git push origin $APP_VERSION
         displayName: Create Git tag for release
-        # only create a tag if pipeline is on branch 'master'
-        condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+        condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
         workingDirectory: $(Build.SourcesDirectory)
         env:
           APP_VERSION: '$(versionNumber)'          
