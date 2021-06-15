@@ -37,6 +37,8 @@ From your service initialize a publisher with all the dependant services
 
 ### Testing
 
+Copy server.crt, server.key files from this library and put them in your project under a testdata/cert folder
+
 In your service import testpublisher package
 
 ```testpublisher "github.com/Placons/oneapp-lib-servicebus-publisher/v2/integration"```

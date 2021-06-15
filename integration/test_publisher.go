@@ -19,7 +19,7 @@ func MockPublisher(t *testing.T, queue string, port string) *httptest.Server {
 		res.WriteHeader(http.StatusCreated)
 	})
 
-	cert, err := tls.LoadX509KeyPair("../integration/testdata/cert/server.crt", "../integration/testdata/cert/server.key")
+	cert, err := tls.LoadX509KeyPair("testdata/cert/server.crt", "testdata/cert/server.key")
 	if err != nil {
 		t.Errorf("Bad server certs, error was: %s", err)
 	}
