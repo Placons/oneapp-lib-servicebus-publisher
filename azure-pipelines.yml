@@ -28,7 +28,7 @@ variables:
 - name: patchScope
   value: ${{variables['version.MajorMinor']}}
 - name: version.Revision
-  value: $[counter(variables['patchScope'], 7)]
+  value: $[counter(variables['patchScope'], 0)]
 - name: versionNumber
   value: '$(version.MajorMinor).$(version.Revision)'
 - name: gitID
