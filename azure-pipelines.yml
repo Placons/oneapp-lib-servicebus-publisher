@@ -26,7 +26,7 @@ variables:
 - name: version.MajorMinor
   value: 'v2.0' # Manually adjust the version number as needed for semantic versioning. Revision is auto-incremented.
 - name: patchScope
-  value: ${{variables['version.MajorMinor']}}-${{variables['Build.SourceBranchName']}}
+  value: ${{variables['version.MajorMinor']}}
 - name: version.Revision
   value: $[counter(variables['patchScope'], 0)]
 - name: versionNumber
