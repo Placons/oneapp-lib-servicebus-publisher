@@ -13,10 +13,14 @@ import (
 )
 
 func MockPublisher(t *testing.T, queue string, port string) *httptest.Server {
+	return mockPublisher(t, queue, port, http.StatusCreated)
+}
+
+func mockPublisher(t *testing.T, queue string, port string, s int) *httptest.Server {
 	publisherServeMux := http.NewServeMux()
 	publisherServeMux.HandleFunc(fmt.Sprintf("/%s/messages", queue), func(res http.ResponseWriter, req *http.Request) {
 		assert.Equal(t, http.MethodPost, req.Method)
-		res.WriteHeader(http.StatusCreated)
+		res.WriteHeader(s)
 	})
 
 	cert, err := tls.LoadX509KeyPair("testdata/cert/server.crt", "testdata/cert/server.key")
@@ -32,6 +36,10 @@ func MockPublisher(t *testing.T, queue string, port string) *httptest.Server {
 	publisherMockServer.StartTLS()
 
 	return publisherMockServer
+}
+
+func BrokenMockPublisher(t *testing.T, queue string, port string) *httptest.Server {
+	return mockPublisher(t, queue, port, http.StatusInternalServerError)
 }
 
 func HttpClientNoCertVerify() *http.Client {
