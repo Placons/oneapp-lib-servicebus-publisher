@@ -28,7 +28,17 @@ func NewPublisher(logger *logger.StandardLogger, client adapter.HTTPClient, conf
 	}
 }
 
+// Publish publishes the given message, using publisher's already provided configuration
 func (p Publisher) Publish(message interface{}) error {
+	return p.doPublish(message, make(map[string]string))
+}
+
+// Publish publishes the given message, including custom properties, using publisher's already provided configuration
+func (p Publisher) PublishWithProps(message interface{}, properties map[string]string) error {
+	return p.doPublish(message, properties)
+}
+
+func (p Publisher) doPublish(message interface{}, properties map[string]string) error {
 	var (
 		endpoint      = p.config.Endpoint
 		queueName     = p.config.QueueName
@@ -72,7 +82,7 @@ func (p Publisher) Publish(message interface{}) error {
 	}
 	sasToken := p.generator.Generate(pubURL, signingKey, expiry, sharedKeyName)
 
-	err = p.serviceBusAdapter.SendMessage(pubURL, sasToken, message)
+	err = p.serviceBusAdapter.SendMessage(pubURL, sasToken, message, properties)
 	if err != nil {
 		p.logger.ErrorWithErrAndFields("Failed to publish message to endpoint", err, map[string]interface{}{
 			"endpoint": endpoint,
@@ -93,7 +103,7 @@ func joinURL(url *url.URL, path string) string {
 }
 
 type ServiceBusAdapter interface {
-	SendMessage(url string, sasToken string, message interface{}) error
+	SendMessage(url string, sasToken string, message interface{}, properties map[string]string) error
 }
 
 type SasTokenGenerator interface {
