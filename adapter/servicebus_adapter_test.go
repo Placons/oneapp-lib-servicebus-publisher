@@ -50,7 +50,7 @@ func TestReturnErrorWhenResponseStatusCodeNotCreated(t *testing.T) {
 		})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "Failed to send message to service bus due to statusCode 500")
+	assert.EqualError(t, err, "(send-message) failed to send message to service bus due to statusCode: 500")
 }
 
 func TestServiceBusAdapterReturnErrorWhenHttpRequestCouldNotBeSent(t *testing.T) {
@@ -62,7 +62,7 @@ func TestServiceBusAdapterReturnErrorWhenHttpRequestCouldNotBeSent(t *testing.T)
 	err := adapter.SendMessage("some-url", "my-sas", nil)
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "An expected error")
+	assert.EqualError(t, err, "(send-message) failed to send http request: An expected error")
 }
 
 type FakeHTTPClient struct {
