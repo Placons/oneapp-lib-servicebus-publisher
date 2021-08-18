@@ -33,7 +33,7 @@ func TestShouldSendMessageSuccessfully(t *testing.T) {
 	err := adapter.SendMessage("some-url", "my-sas",
 		DummyMessage{
 			Greeting: "Hello from my go client!",
-		})
+		}, nil)
 
 	assert.NoError(t, err)
 }
@@ -47,7 +47,7 @@ func TestReturnErrorWhenResponseStatusCodeNotCreated(t *testing.T) {
 	err := adapter.SendMessage("some-url", "my-sas",
 		DummyMessage{
 			Greeting: "Hello from my go client!",
-		})
+		}, nil)
 
 	assert.Error(t, err)
 	assert.EqualError(t, err, "Failed to send message to service bus due to statusCode 500")
@@ -59,7 +59,7 @@ func TestServiceBusAdapterReturnErrorWhenHttpRequestCouldNotBeSent(t *testing.T)
 
 	adapter := NewServiceBusAdapter(logger.NewStandardLogger("test"), mockClient)
 
-	err := adapter.SendMessage("some-url", "my-sas", nil)
+	err := adapter.SendMessage("some-url", "my-sas", nil, nil)
 
 	assert.Error(t, err)
 	assert.EqualError(t, err, "An expected error")

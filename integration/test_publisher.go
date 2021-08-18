@@ -13,12 +13,21 @@ import (
 )
 
 func MockPublisher(t *testing.T, queue string, port string) *httptest.Server {
-	return mockPublisher(t, queue, port, http.StatusCreated)
+	return mockPublisher(t, queue, port, http.StatusCreated, make(map[string]string))
 }
 
-func mockPublisher(t *testing.T, queue string, port string, s int) *httptest.Server {
+func MockPublisherWithProps(t *testing.T, queue string, port string, properties map[string]string) *httptest.Server {
+	return mockPublisher(t, queue, port, http.StatusCreated, properties)
+}
+
+func BrokenMockPublisher(t *testing.T, queue string, port string) *httptest.Server {
+	return mockPublisher(t, queue, port, http.StatusInternalServerError, make(map[string]string))
+}
+
+func mockPublisher(t *testing.T, queue string, port string, s int, properties map[string]string) *httptest.Server {
 	publisherServeMux := http.NewServeMux()
 	publisherServeMux.HandleFunc(fmt.Sprintf("/%s/messages", queue), func(res http.ResponseWriter, req *http.Request) {
+		assertProperties(t, req, properties)
 		assert.Equal(t, http.MethodPost, req.Method)
 		res.WriteHeader(s)
 	})
@@ -38,8 +47,16 @@ func mockPublisher(t *testing.T, queue string, port string, s int) *httptest.Ser
 	return publisherMockServer
 }
 
-func BrokenMockPublisher(t *testing.T, queue string, port string) *httptest.Server {
-	return mockPublisher(t, queue, port, http.StatusInternalServerError)
+func assertProperties(t *testing.T, req *http.Request, properties map[string]string) {
+	for h, v := range properties {
+		got := req.Header.Get(h)
+		if len(got) == 0 {
+			t.Errorf("Property %s was not found in request header", h)
+			return
+		}
+
+		assert.Equal(t, v, got, "Unexpected value found in request header")
+	}
 }
 
 func HttpClientNoCertVerify() *http.Client {

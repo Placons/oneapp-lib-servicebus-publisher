@@ -27,11 +27,12 @@ type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-// SendMessage sends a message to an event bus queue using a POST http request
-// serviceNamespace is the namespace of the azure service bus
-// endpoint is the name of the endpoint (topic or queue)
+// SendMessage sends a message to an event bus queue/topic using a POST http request
+// baseURL of azure service bus messages endpoint
+// sasToken is the generated authorization token for mesages endpoint
 // message is the actual message
-func (a ServiceBusAdapter) SendMessage(baseURL string, sasToken string, message interface{}) error {
+// properties is an optional map of properties to be added as headers in the http request
+func (a ServiceBusAdapter) SendMessage(baseURL string, sasToken string, message interface{}, properties map[string]string) error {
 	url := fmt.Sprintf("%s/messages", baseURL)
 	requestByte, _ := json.Marshal(message)
 	r, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(requestByte))
@@ -42,6 +43,10 @@ func (a ServiceBusAdapter) SendMessage(baseURL string, sasToken string, message 
 	}
 
 	r.Header.Add("Authorization", sasToken)
+
+	for h, v := range properties {
+		r.Header.Add(h, v)
+	}
 
 	resp, err := a.client.Do(r)
 	if err != nil {
