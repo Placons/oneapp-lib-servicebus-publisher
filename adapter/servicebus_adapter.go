@@ -4,12 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/Placons/oneapp-logger/logger"
 )
-
-const messageCreationFailure = "Failed to send message to service bus due to statusCode %d"
 
 type ServiceBusAdapter struct {
 	logger *logger.StandardLogger
@@ -38,6 +37,7 @@ func (a ServiceBusAdapter) SendMessage(baseURL string, sasToken string, message 
 	r, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(requestByte))
 
 	if err != nil {
+		err = fmt.Errorf("(send-message) failed to create http request: %v", err)
 		a.logger.ErrorWithErr("Failed to create http request", err)
 		return err
 	}
@@ -50,16 +50,25 @@ func (a ServiceBusAdapter) SendMessage(baseURL string, sasToken string, message 
 
 	resp, err := a.client.Do(r)
 	if err != nil {
+		err = fmt.Errorf("(send-message) failed to send http request: %v", err)
 		a.logger.ErrorWithErr("Failed to send http request", err)
 		return err
 	}
-	defer resp.Body.Close()
+	defer closeBody(resp.Body, &err, a.logger)
 
 	if resp.StatusCode != 201 {
-		err = fmt.Errorf(messageCreationFailure, resp.StatusCode)
+		err = fmt.Errorf("(send-message) failed to send message to service bus due to statusCode: %d", resp.StatusCode)
 		a.logger.ErrorWithErr("", err)
 		return err
 	}
+
+	_, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		err = fmt.Errorf("(send-message) body read failure: %v", err)
+		a.logger.ErrorWithErr("", err)
+		return err
+	}
+
 	a.logger.DebugWithFields("Successfully sent message", map[string]interface{}{
 		"message": string(requestByte),
 		"url":     url,
