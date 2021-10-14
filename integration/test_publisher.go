@@ -3,6 +3,7 @@ package integration
 import (
 	"crypto/tls"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -13,20 +14,32 @@ import (
 )
 
 func MockPublisher(t *testing.T, queue string, port string) *httptest.Server {
-	return mockPublisher(t, queue, port, http.StatusCreated, make(map[string]string))
+	return mockPublisher(t, queue, port, http.StatusCreated, make(map[string]string), nil)
 }
 
 func MockPublisherWithProps(t *testing.T, queue string, port string, properties map[string]string) *httptest.Server {
-	return mockPublisher(t, queue, port, http.StatusCreated, properties)
+	return mockPublisher(t, queue, port, http.StatusCreated, properties, nil)
+}
+
+func MockPublisherWithPropsAndBody(t *testing.T, queue string, port string, properties map[string]string, body *string) *httptest.Server {
+	return mockPublisher(t, queue, port, http.StatusCreated, properties, body)
 }
 
 func BrokenMockPublisher(t *testing.T, queue string, port string) *httptest.Server {
-	return mockPublisher(t, queue, port, http.StatusInternalServerError, make(map[string]string))
+	return mockPublisher(t, queue, port, http.StatusInternalServerError, make(map[string]string), nil)
 }
 
-func mockPublisher(t *testing.T, queue string, port string, s int, properties map[string]string) *httptest.Server {
+func mockPublisher(t *testing.T, queue string, port string, s int, properties map[string]string, body *string) *httptest.Server {
 	publisherServeMux := http.NewServeMux()
 	publisherServeMux.HandleFunc(fmt.Sprintf("/%s/messages", queue), func(res http.ResponseWriter, req *http.Request) {
+		if body != nil {
+			b, err := ioutil.ReadAll(req.Body)
+			if err != nil {
+				t.Errorf("could not read request: %v", err)
+			}
+			assert.JSONEq(t, *body, string(b))
+		}
+
 		assertProperties(t, req, properties)
 		assert.Equal(t, http.MethodPost, req.Method)
 		res.WriteHeader(s)
